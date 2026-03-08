@@ -1,27 +1,72 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import TaskCard from "../components/TaskCard"
+import "../styles/globals.css"
 
-export default function TaskCard({ task }) {
-  const [proof, setProof] = useState("")
+export default function Home() {
+  const [tasks, setTasks] = useState([])
+  const [title, setTitle] = useState("")
+  const [reward, setReward] = useState("")
+  const [darkMode, setDarkMode] = useState(true)
 
-  function share() {
-    if (!proof) return alert("Submit a proof link first!")
-    const text = `I just earned BTC completing "${task.title}" on Taskatoshi ⚡`
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`
-    )
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.remove("light")
+    } else {
+      document.body.classList.add("light")
+    }
+  }, [darkMode])
+
+  function createTask() {
+    if (!title || !reward) return alert("Enter title and reward")
+    const newTask = {
+      id: Date.now(),
+      title,
+      reward,
+      proof: ""
+    }
+    setTasks([...tasks, newTask])
+    setTitle("")
+    setReward("")
   }
 
   return (
-    <div className="task-card">
-      <h3>{task.title}</h3>
-      <p>Reward: {task.reward} BTC</p>
+    <div style={{ padding: "40px" }}>
+      {/* Dark / Light Toggle */}
+      <div className="toggle-container">
+        <label className="toggle-switch">
+          {darkMode ? "Dark" : "Light"}
+          <input
+            type="checkbox"
+            checked={!darkMode}
+            onChange={() => setDarkMode(!darkMode)}
+          />
+          <span className="toggle-slider"></span>
+        </label>
+      </div>
 
+      <h1>⚡ Taskatoshi</h1>
+      <p>Earn Bitcoin by completing tasks</p>
+
+      <h2>Create Task</h2>
       <input
-        placeholder="Submit proof link"
-        value={proof}
-        onChange={(e) => setProof(e.target.value)}
+        placeholder="Task title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
       />
-      <button onClick={share}>Submit & Share</button>
+      <input
+        placeholder="Reward (BTC)"
+        value={reward}
+        onChange={(e) => setReward(e.target.value)}
+      />
+      <button onClick={createTask}>Create Task</button>
+
+      <hr />
+
+      <h2>Bounty Board</h2>
+      {tasks.length === 0 && <p>No tasks yet.</p>}
+      {tasks.map((task) => (
+        <TaskCard key={task.id} task={task} />
+      ))}
     </div>
   )
 }
